@@ -59,40 +59,69 @@ double determinant(const vector<vector<double>>& A) {
 // Функция для вычисления обратной матрицы с помощью метода Гаусса-Жордана
 vector<vector<double>> inverseMatrix(const vector<vector<double>>& A) {
     int n = A.size();
-    vector<vector<double>> R(n, vector<double>(2 * n, 0));
-    vector<vector<double>> RR = A;
+    vector<vector<double>> R(n, vector<double>(2*n, 0));
+    //vector<vector<double>> RR = A;
 
     // Создание матрицы R
     for (int i = 0; i < n; ++i) {
         for (int j = 0; j < n; ++j) {
             R[i][j] = A[i][j];
-        }
-        R[i][n + i] = 1;
-    }
 
-    // Прямой ход метода Гаусса-Жордана
-    for (int k = 0; k < n; ++k) {
-        for (int j = 0; j < 2 * n; ++j) {
-            if (j == k) continue;
-            RR[k][j] /= RR[k][k];
         }
-        RR[k][k] = 1;
-
-        for (int i = 0; i < n; ++i) {
-            if (i == k) continue;
-            for (int j = 0; j < 2 * n; ++j) {
-                if (j == k) continue;
-                RR[i][j] -= RR[i][k] * RR[k][j];
+        //R[i][n + i] = 1;
+        for (int j = n; j < 2 * n; j++) {
+            if (i == j - n) {
+                R[i][j] = 1;
             }
-            RR[i][k] = 0;
+            else {
+                R[i][j] = 0;
+            } 
+        }
+    }
+    printMatrix(R, "matrix_R.txt");
+
+    // прямой ход метода Гаусса
+    double Rmax, C;
+    int p;
+    for (int k = 0; k <= n - 2; k++)
+    {
+        Rmax = abs(R[k][k]);
+        p = k; // р - номер строки с максимальным по модулю элементом
+
+        // выбор строки с макс. по модулю эл-том в к-ом столбце среди к, к + 1, ..., n строк
+        for (int i = k + 1; i <= n - 1; i++)
+        {
+            if (abs(R[i][k] > Rmax))
+            {
+                Rmax = abs(R[i][k]);
+                p = i;
+            }
+        }
+
+        // перестановка строк
+        for (int j = k; j < 2 * n + 1; j++)
+        {
+            C = R[k][j];
+            R[k][j] = R[p][j];
+            R[p][j] = C;
+        }
+
+        double s;
+        for (int i = k + 1; i <= n - 1; i++)
+        {
+            s = R[i][k] / R[k][k];
+            for (int j = k; j <= 2 * n - 1; j++)
+            {
+                R[i][j] = R[i][j] - R[k][j] * s;
+            }
         }
     }
 
-    // Извлечение обратной матрицы из RR
+    // Извлечение обратной матрицы из R
     vector<vector<double>> A_inverse(n, vector<double>(n, 0));
     for (int i = 0; i < n; ++i) {
         for (int j = 0; j < n; ++j) {
-            A_inverse[i][j] = RR[i][n + j];
+            A_inverse[i][j] = R[i][n + j];
         }
     }
 
